@@ -1,0 +1,35 @@
+body {
+    background-color: #f8f9fa;
+}
+
+.card {
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.card-header {
+    border-bottom: none;
+}
+
+.form-control {
+    border-radius: 8px;
+}
+
+.btn-primary {
+    border-radius: 8px;
+    padding: 10px 20px;
+}
+
+.results img {
+    border-radius: 8px;
+    width: 100%;
+    height: auto;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.alert {
+    border-radius: 8px;
+} 

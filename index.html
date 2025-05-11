@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Enhancement App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #7209b7;
+            --secondary-color: #3a0ca3;
+            --accent-color: #4361ee;
+            --success-color: #4cc9f0;
+            --background-color: #f8f9fd;
+            --card-background: #ffffff;
+            --text-primary: #2d3748;
+            --text-secondary: #718096;
+            --border-radius: 16px;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+            --gradient-primary: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            background-image: url('https://images.unsplash.com/photo-1591779051696-1c3fa1469a79?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Add a dark overlay to the background for better readability */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.3);
+            z-index: -1;
+        }
+
+        /* Add overlay to make content more readable */
+        .content-overlay {
+            background-color: rgba(248, 249, 253, 0.9);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-lg);
+            backdrop-filter: blur(5px);
+        }
+
+        .navbar {
+            background: var(--gradient-primary);
+            padding: 1rem 0;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 2rem;
+        }
+
+        .navbar-brand {
+            font-weight: 600;
+            font-size: 1.25rem;
+        }
+
+        .app-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            margin-bottom: 0.5rem;
+        }
+
+        .app-subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.9);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .card {
+            background: var(--card-background);
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card-title {
+            color: var(--primary-color);
+            font-weight: 600;
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--accent-color);
+            border-radius: var(--border-radius);
+            padding: 2.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(67, 97, 238, 0.03);
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-color);
+            background: rgba(114, 9, 183, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 3.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .image-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
+            background: var(--card-background);
+            padding: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .image-container img {
+            width: 100%;
+            height: auto;
+            border-radius: calc(var(--border-radius) - 8px);
+            transition: transform 0.3s ease;
+        }
+
+        .image-container:hover img {
+            transform: scale(1.02);
+        }
+
+        .image-title {
+            position: absolute;
+            top: 1.5rem;
+            left: 1.5rem;
+            background: rgba(0,0,0,0.75);
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            backdrop-filter: blur(4px);
+            z-index: 1;
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            border: none;
+            border-radius: 30px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .form-control, .form-select {
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(114, 9, 183, 0.1);
+        }
+
+        .metrics-container {
+            background: var(--card-background);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-md);
+        }
+
+        .metric-card {
+            background: rgba(67, 97, 238, 0.03);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .metric-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .chart-container {
+            background: var(--card-background);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-md);
+        }
+
+        .form-check-input:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .alert {
+            border-radius: var(--border-radius);
+            border: none;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .alert-danger {
+            background-color: #fff5f5;
+            color: #c53030;
+            border-left: 4px solid #fc8181;
+        }
+
+        .image-info {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--background-color);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary-color);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        /* Enhanced Form Styling */
+        .form-label {
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-check-label {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* Enhanced Card Headers */
+        .section-header {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        /* Enhanced Metrics Display */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .metric-item {
+            background: rgba(67, 97, 238, 0.03);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .metric-item:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Enhanced Image Grid */
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .image-actions {
+            position: absolute;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            display: flex;
+            gap: 0.5rem;
+            z-index: 1;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+        }
+
+        .image-container:hover .image-actions {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .btn-download {
+            background: rgba(0, 0, 0, 0.75);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            backdrop-filter: blur(4px);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-download:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .wizard-step {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .wizard-step.active {
+            display: block;
+        }
+
+        .card {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn {
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-lg {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <div class="navbar-brand">
+                <i class="fas fa-magic me-2"></i>
+                <div class="d-none d-md-block">
+                    <div class="app-title">Image Enhancement Studio</div>
+                    <div class="app-subtitle">Transform your images with AI</div>
+                </div>
+                <div class="d-block d-md-none">
+                    Image Enhancement Studio
+                </div>
+            </div>
+            <div class="navbar-nav ms-auto">
+                <span class="nav-item nav-link text-light">
+                    <i class="fas fa-user-circle me-2"></i>
+                    {{ current_user.username }}
+                </span>
+                <a class="nav-link" href="{{ url_for('logout') }}">
+                    <i class="fas fa-sign-out-alt me-2"></i>
+                    Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        {% if error %}
+        <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            {{ error }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endif %}
+
+        <!-- Step Wizard -->
+        <div class="content-overlay">
+            <div class="wizard-container" id="wizardContainer">
+                <!-- Step 1: Initial Question -->
+                <div class="wizard-step {% if not success %}active{% endif %}" id="step1">
+                    <div class="card fade-in">
+                        <div class="card-body text-center">
+                            <div class="mb-4">
+                                <i class="fas fa-image fa-3x text-primary"></i>
+                            </div>
+                            <h3 class="mb-4">Would you like to enhance an image?</h3>
+                            <div class="d-flex justify-content-center gap-3">
+                                <button class="btn btn-primary btn-lg px-5" onclick="showStep('step2')">
+                                    <i class="fas fa-check me-2"></i>Yes
+                                </button>
+                                <button class="btn btn-outline-secondary btn-lg px-5" onclick="showMessage('Maybe next time!')">
+                                    <i class="fas fa-times me-2"></i>No
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Enhancement Type -->
+                <div class="wizard-step" id="step2">
+                    <div class="card fade-in">
+                        <div class="card-body text-center">
+                            <div class="mb-4">
+                                <i class="fas fa-magic fa-3x text-primary"></i>
+                            </div>
+                            <h3 class="mb-4">Do you want to enhance this image?</h3>
+                            <div class="d-flex justify-content-center gap-3">
+                                <button class="btn btn-primary btn-lg px-5" onclick="selectEnhancement('both')">
+                                    <i class="fas fa-check me-2"></i>Yes
+                                </button>
+                                <button class="btn btn-outline-secondary btn-lg px-5" onclick="showStep('step1')">
+                                    <i class="fas fa-times me-2"></i>No
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Upload Interface -->
+                <div class="wizard-step {% if success %}active{% endif %}" id="step3" {% if success %}data-success="true"{% endif %}>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card fade-in">
+                                <div class="card-body">
+                                    <h5 class="section-header">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        Upload Image
+                                    </h5>
+                                    <form method="POST" enctype="multipart/form-data" id="uploadForm">
+                                        <div class="upload-area mb-4" id="dropZone">
+                                            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                                            <h5 class="mb-3">Drag and drop your image here</h5>
+                                            <p class="text-muted">or click to browse</p>
+                                            <input type="file" class="d-none" id="fileInput" name="file" accept=".png,.jpg,.jpeg">
+                                            <div class="image-info" id="imageInfo"></div>
+                                        </div>
+                                        
+                                        <div class="mb-4">
+                                            <label class="form-label">
+                                                <i class="fas fa-sliders-h me-2"></i>
+                                                Noise Type
+                                            </label>
+                                            <div class="form-check mb-2">
+                                                <input class="form-check-input" type="radio" name="noise_type" id="gaussian" value="gaussian" checked>
+                                                <label class="form-check-label" for="gaussian">
+                                                    Gaussian Noise
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="noise_type" id="salt_pepper" value="salt_pepper">
+                                                <label class="form-check-label" for="salt_pepper">
+                                                    Salt & Pepper Noise
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-4">
+                                            <label for="noise_intensity" class="form-label">
+                                                <i class="fas fa-percentage me-2"></i>
+                                                Noise Intensity: <span id="noiseValue">5%</span>
+                                            </label>
+                                            <input type="range" 
+                                                   class="form-range" 
+                                                   id="noise_intensity" 
+                                                   name="noise_intensity" 
+                                                   min="0" 
+                                                   max="0.3" 
+                                                   step="0.01" 
+                                                   value="0.05"
+                                                   style="accent-color: var(--primary-color);">
+                                        </div>
+
+                                        <div class="d-flex justify-content-between">
+                                            <button type="button" class="btn btn-outline-secondary" onclick="showStep('step2')">
+                                                <i class="fas fa-arrow-left me-2"></i>Back
+                                            </button>
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-magic me-2"></i>
+                                                Enhance Image
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            
+                            {% if success %}
+                            <div class="card fade-in mt-4">
+                                <div class="card-body">
+                                    <h5 class="section-header">
+                                        <i class="fas fa-redo text-primary"></i>
+                                        Try Again
+                                    </h5>
+                                    <a href="/" class="btn btn-primary w-100" style="background: var(--gradient-primary); border-radius: 30px; text-decoration: none;">
+                                        <i class="fas fa-redo me-2"></i>Start Over
+                                    </a>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        {% if success %}
+                        <div class="col-md-8">
+                            <div class="alert alert-success mb-4">
+                                <i class="fas fa-check-circle me-2"></i>
+                                <strong>Success!</strong> Your image has been enhanced successfully.
+                            </div>
+                            
+                            <div class="image-grid">
+                                <div class="image-container fade-in">
+                                    <div class="image-title">
+                                        <i class="fas fa-image me-2"></i>
+                                        Original Image
+                                    </div>
+                                    <img src="{{ input_image }}" alt="Original Image" class="img-fluid">
+                                    <div class="image-actions">
+                                        <a href="{{ input_image }}" download class="btn-download">
+                                            <i class="fas fa-download"></i>
+                                            Download
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="image-container fade-in">
+                                    <div class="image-title">
+                                        <i class="fas fa-random me-2"></i>
+                                        Noisy Image
+                                    </div>
+                                    <img src="{{ noisy_image }}" alt="Noisy Image" class="img-fluid">
+                                    <div class="image-actions">
+                                        <a href="{{ noisy_image }}" download class="btn-download">
+                                            <i class="fas fa-download"></i>
+                                            Download
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="image-container fade-in">
+                                    <div class="image-title">
+                                        <i class="fas fa-magic me-2"></i>
+                                        Traditional Enhancement
+                                    </div>
+                                    <img src="{{ trad_output_image }}" alt="Traditional Enhancement" class="img-fluid">
+                                    <div class="image-actions">
+                                        <a href="{{ trad_output_image }}" download class="btn-download">
+                                            <i class="fas fa-download"></i>
+                                            Download
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="image-container fade-in">
+                                    <div class="image-title">
+                                        <i class="fas fa-brain me-2"></i>
+                                        ML Enhancement
+                                    </div>
+                                    <img src="{{ ml_output_image }}" alt="ML Enhancement" class="img-fluid">
+                                    <div class="image-actions">
+                                        <a href="{{ ml_output_image }}" download class="btn-download">
+                                            <i class="fas fa-download"></i>
+                                            Download
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="metrics-container fade-in">
+                                <h5 class="section-header">
+                                    <i class="fas fa-chart-line"></i>
+                                    Image Quality Metrics
+                                </h5>
+                                <div class="metrics-grid">
+                                    <div class="metric-item">
+                                        <div class="metric-label">Traditional PSNR</div>
+                                        <div class="metric-value">{{ trad_psnr }}</div>
+                                    </div>
+                                    <div class="metric-item">
+                                        <div class="metric-label">Traditional SSIM</div>
+                                        <div class="metric-value">{{ trad_ssim }}</div>
+                                    </div>
+                                    <div class="metric-item">
+                                        <div class="metric-label">ML PSNR</div>
+                                        <div class="metric-value">{{ ml_psnr }}</div>
+                                    </div>
+                                    <div class="metric-item">
+                                        <div class="metric-label">ML SSIM</div>
+                                        <div class="metric-value">{{ ml_ssim }}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="chart-container fade-in">
+                                <canvas id="metricsChart" {% if success %}data-chart-data='{{ chart_data | safe }}'{% endif %}></canvas>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success Message -->
+        <div class="message-container content-overlay" id="messageContainer" style="display: none;">
+            <div class="card fade-in">
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-check-circle fa-3x text-success"></i>
+                    </div>
+                    <h3 class="mb-4" id="messageText"></h3>
+                    <button class="btn btn-primary" onclick="resetWizard()">
+                        <i class="fas fa-redo me-2"></i>Start Over
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropZone = document.getElementById('dropZone');
+            const fileInput = document.getElementById('fileInput');
+            const uploadForm = document.getElementById('uploadForm');
+            const imageInfo = document.getElementById('imageInfo');
+            const metricsChart = document.getElementById('metricsChart');
+            const noiseIntensity = document.getElementById('noise_intensity');
+            const noiseValue = document.getElementById('noiseValue');
+
+            // Update noise value display when slider moves
+            noiseIntensity.addEventListener('input', function() {
+                const value = (this.value * 100).toFixed(0);
+                noiseValue.textContent = `${value}%`;
+            });
+
+            // Initialize the wizard state
+            let selectedEnhancement = '';
+            
+            function showImageInfo(file) {
+                return new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.onload = function() {
+                        const width = this.width;
+                        const height = this.height;
+                        imageInfo.innerHTML = `
+                            <div class="mt-3">
+                                <div><strong>Original dimensions:</strong> ${width}x${height} pixels</div>
+                                <div class="text-muted small">Will be processed at 256x256 pixels</div>
+                            </div>
+                        `;
+                        resolve(true);
+                    };
+                    img.onerror = () => {
+                        imageInfo.textContent = 'Error loading image';
+                        reject(new Error('Failed to load image'));
+                    };
+                    img.src = URL.createObjectURL(file);
+                });
+            }
+
+            function initializeChart(chartData) {
+                if (!metricsChart) return;
+                
+                const ctx = metricsChart.getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['PSNR', 'SSIM'],
+                        datasets: [
+                            {
+                                label: 'Traditional Enhancement',
+                                data: [chartData.psnr.Traditional, chartData.ssim.Traditional],
+                                backgroundColor: 'rgba(114, 9, 183, 0.5)',
+                                borderColor: 'rgba(114, 9, 183, 1)',
+                                borderWidth: 2
+                            },
+                            {
+                                label: 'ML Enhancement',
+                                data: [chartData.psnr['ML Enhanced'], chartData.ssim['ML Enhanced']],
+                                backgroundColor: 'rgba(67, 97, 238, 0.5)',
+                                borderColor: 'rgba(67, 97, 238, 1)',
+                                borderWidth: 2
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.05)'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    font: {
+                                        family: 'Inter',
+                                        size: 12
+                                    },
+                                    padding: 20
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Handle drag and drop
+            dropZone.addEventListener('click', () => fileInput.click());
+
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => {
+                    dropZone.classList.add('dragover');
+                });
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => {
+                    dropZone.classList.remove('dragover');
+                });
+            });
+
+            dropZone.addEventListener('drop', async (e) => {
+                const files = e.dataTransfer.files;
+                if (files.length) {
+                    const file = files[0];
+                    if (file.type.startsWith('image/')) {
+                        await showImageInfo(file);
+                        fileInput.files = files;
+                        // Don't auto-submit, let the user click the button
+                    }
+                }
+            });
+
+            fileInput.addEventListener('change', async () => {
+                const files = fileInput.files;
+                if (files.length) {
+                    const file = files[0];
+                    if (file.type.startsWith('image/')) {
+                        await showImageInfo(file);
+                        // Don't auto-submit, let the user click the button
+                    }
+                }
+            });
+
+            // Initialize chart if data exists
+            const chartDataElement = document.getElementById('metricsChart');
+            if (chartDataElement && chartDataElement.dataset.chartData) {
+                try {
+                    const chartData = JSON.parse(chartDataElement.dataset.chartData);
+                    initializeChart(chartData);
+                } catch (error) {
+                    console.error('Error initializing chart:', error);
+                }
+            }
+            
+            // Add hidden input for enhancement type
+            const enhancementTypeInput = document.createElement('input');
+            enhancementTypeInput.type = 'hidden';
+            enhancementTypeInput.name = 'enhancement_type';
+            enhancementTypeInput.id = 'enhancement_type';
+            uploadForm.appendChild(enhancementTypeInput);
+            
+            // Handle form submission
+            uploadForm.addEventListener('submit', function(e) {
+                if (!selectedEnhancement) {
+                    e.preventDefault();
+                    alert('Please select an enhancement type first!');
+                    showStep('step2');
+                    return;
+                }
+                
+                if (!fileInput.files || fileInput.files.length === 0) {
+                    e.preventDefault();
+                    alert('Please select an image file!');
+                    return;
+                }
+                
+                // Set the enhancement type value
+                document.getElementById('enhancement_type').value = selectedEnhancement;
+            });
+            
+            // Check if we need to show results (after form submission)
+            const successElement = document.querySelector('[data-success="true"]');
+            if (successElement) {
+                showStep('step3');
+            }
+            
+            // Expose these functions to global scope for the buttons to use
+            window.showStep = function(stepId) {
+                document.querySelectorAll('.wizard-step').forEach(step => {
+                    step.classList.remove('active');
+                });
+                document.getElementById(stepId).classList.add('active');
+                
+                if (stepId === 'step1') {
+                    selectedEnhancement = '';
+                }
+            };
+
+            window.selectEnhancement = function(type) {
+                selectedEnhancement = type;
+                document.getElementById('enhancement_type').value = type;
+                showStep('step3');
+            };
+
+            window.showMessage = function(message) {
+                document.getElementById('wizardContainer').style.display = 'none';
+                document.getElementById('messageContainer').style.display = 'block';
+                document.getElementById('messageText').textContent = message;
+                
+                // Add a delay before redirecting back to step1
+                setTimeout(function() {
+                    document.getElementById('wizardContainer').style.display = 'block';
+                    document.getElementById('messageContainer').style.display = 'none';
+                    showStep('step1');
+                }, 2000);
+            };
+
+            window.resetWizard = function() {
+                // Redirect to the home page to reset
+                window.location.href = "/";
+            };
+        });
+    </script>
+</body>
+</html> 
